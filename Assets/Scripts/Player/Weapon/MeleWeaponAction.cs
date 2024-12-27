@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class MeleWeaponAction : MonoBehaviour
 {
-    public WeaponDamage WeaponDamage;
+    public SwordScript Sword;
     private float meledamage;
 
     private void Start()
     {
-        meledamage = WeaponDamage.Damage;
+        meledamage = Sword.Damage;
     }
 
     private void OnTriggerEnter2D(Collider2D other)

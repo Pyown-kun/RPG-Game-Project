@@ -6,29 +6,19 @@ using UnityEngine.InputSystem;
 
 public class PlayerControls : MonoBehaviour
 {
+    public Vector2 TurnMovement;
+    public Vector2 Movement;
+
     [SerializeField] private float moveSpeed;
-    [SerializeField] private GameObject meleAttack;
-    [SerializeField] private GameObject topAttackAction;
-    [SerializeField] private GameObject botAttackAction;
-    [SerializeField] private GameObject sideAttackAction;
 
     private InputManagers inputManagers;
     private Rigidbody2D rb;
-    private Animator animator;
-    private Vector2 movement;
 
     private void Awake()
     {
         inputManagers = new InputManagers();
         rb = GetComponent<Rigidbody2D>();
-        animator = GetComponent<Animator>();
     }
-
-    private void Start()
-    {
-        inputManagers.Player.Attack.started += _ => Attack();
-    }
-
 
     private void OnEnable()
     {
@@ -38,7 +28,7 @@ public class PlayerControls : MonoBehaviour
     private void Update()
     {
         PlayerInput();
-        AnimationMove();
+        TurnMove();
     }
 
     private void FixedUpdate()
@@ -49,69 +39,38 @@ public class PlayerControls : MonoBehaviour
 
     private void PlayerInput()
     {
-        movement = inputManagers.Player.Move.ReadValue<Vector2>();
-    }
-
-    private void Attack()
-    {
-        animator.SetTrigger("attack");
-
-        StartCoroutine(AttackAction());
+        Movement = inputManagers.Player.Move.ReadValue<Vector2>();
     }
 
 
     private void Move()
     {
-        rb.MovePosition(rb.position + movement * Time.fixedDeltaTime * moveSpeed);
-
-        if (movement.x > 0.1)
-        {
-            sideAttackAction.SetActive(true);
-            topAttackAction.SetActive(false);
-            botAttackAction.SetActive(false);
-            sideAttackAction.gameObject.transform.rotation = Quaternion.Euler(0, 0, 0);
-        }
-        else if (movement.x < -0.1)
-        {
-            sideAttackAction.SetActive(true);
-            topAttackAction.SetActive(false);
-            botAttackAction.SetActive(false);
-            sideAttackAction.gameObject.transform.rotation = Quaternion.Euler(0, 0, 180);
-        }
-        else if (movement.y > 0.1)
-        {
-            topAttackAction.SetActive(true);
-            sideAttackAction.SetActive(false);
-            botAttackAction.SetActive(false);
-
-        }
-        else if (movement.y < -0.1)
-        {
-            botAttackAction.SetActive(true);
-            topAttackAction.SetActive(false);
-            sideAttackAction.SetActive(false);
-        }
+        rb.MovePosition(rb.position + Movement * Time.fixedDeltaTime * moveSpeed);
     }
 
-    private void AnimationMove()
+    private void TurnMove()
     {
-        animator.SetFloat("speed", movement.sqrMagnitude);
-        
-        if (movement != Vector2.zero)
+        if (Movement.x == 1)
         {
-            animator.SetFloat("xMove", movement.x);
-            animator.SetFloat("yMove", movement.y);
+            TurnMovement.x = 1;
+            TurnMovement.y = 0;
+        }
+        else if (Movement.x == -1)
+        {
+            TurnMovement.x = -1;
+            TurnMovement.y = 0;
         }
 
+        if (Movement.y == 1)
+        {
+            TurnMovement.y = 1;
+            TurnMovement.x = 0;
+        }
+        else if (Movement.y == -1)
+        {
+            TurnMovement.y = -1;
+            TurnMovement.x = 0;
+        }
     }
-
-    private IEnumerator AttackAction()
-    {
-        yield return new WaitForSeconds(0.4f);
-        meleAttack.SetActive(true);
-
-        yield return new WaitForSeconds(0.4f);
-
-        meleAttack.SetActive(false);
-    }
+    
 }
